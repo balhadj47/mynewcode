@@ -13,10 +13,13 @@ const Login: React.FC<LoginProps> = ({ setIsAuthenticated }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
+      console.log('Attempting login with:', { username, password })
       const response = await apiCall('/login', 'POST', { username, password })
+      console.log('Login response:', response)
       setAuthToken(response.token)
       setIsAuthenticated(true)
     } catch (err) {
+      console.error('Login error:', err)
       setError(err instanceof Error ? err.message : 'Login failed')
     }
   }

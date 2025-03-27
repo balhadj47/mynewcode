@@ -11,12 +11,24 @@ export const apiCall = async (endpoint: string, method: 'GET' | 'POST' | 'PUT' |
         'Content-Type': 'application/json',
         ...(token && { Authorization: `Bearer ${token}` })
       },
-      data
+      data,
+      validateStatus: () => true // This will prevent axios from throwing on 500 errors
     }
 
     const response = await axios(config)
+    console.log('API Response:', {
+      status: response.status,
+      data: response.data,
+      config: response.config
+    })
+
+    if (response.status >= 400) {
+      throw new Error(response.data?.message || `API request failed with status ${response.status}`)
+    }
+
     return response.data
   } catch (error) {
+    console.error('API Error:', error)
     if (axios.isAxiosError(error)) {
       throw new Error(error.response?.data?.message || error.message)
     }
