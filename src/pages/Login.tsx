@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { apiCall } from '../api'
+import React, { useState, useEffect } from 'react'
+import { apiCall, testApiConnection } from '../api'
 
 interface LoginProps {
   setIsAuthenticated: (value: boolean) => void
@@ -9,6 +9,19 @@ const Login: React.FC<LoginProps> = ({ setIsAuthenticated }) => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [apiStatus, setApiStatus] = useState('')
+
+  useEffect(() => {
+    const checkApiConnection = async () => {
+      try {
+        await testApiConnection()
+        setApiStatus('API connection successful')
+      } catch (err) {
+        setApiStatus(`API connection failed: ${err instanceof Error ? err.message : 'Unknown error'}`)
+      }
+    }
+    checkApiConnection()
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -19,7 +32,7 @@ const Login: React.FC<LoginProps> = ({ setIsAuthenticated }) => {
       setAuthToken(response.token)
       setIsAuthenticated(true)
     } catch (err) {
-      console.error('Login error:', err)
+      console.error('Login error details:', err)
       setError(err instanceof Error ? err.message : 'Login failed')
     }
   }
@@ -28,6 +41,11 @@ const Login: React.FC<LoginProps> = ({ setIsAuthenticated }) => {
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
       <div className="bg-white p-8 rounded shadow-md w-96">
         <h1 className="text-2xl font-bold mb-6">Admin Login</h1>
+        {apiStatus && (
+          <div className={`mb-4 ${apiStatus.includes('failed') ? 'text-red-500' : 'text-green-500'}`}>
+            {apiStatus}
+          </div>
+        )}
         {error && <div className="mb-4 text-red-500">{error}</div>}
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
